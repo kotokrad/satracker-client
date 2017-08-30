@@ -35,7 +35,7 @@ class Map extends Component {
   renderMap() {
     const GettingStartedGoogleMap = withGoogleMap(() => (
       <GoogleMap
-        defaultZoom={6}
+        defaultZoom={2}
         defaultCenter={{ lat: -22.49947, lng: 94.61294 }}
         options={{ streetViewControl: false }}
       >

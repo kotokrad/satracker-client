@@ -31,12 +31,13 @@ class Satellite extends Component {
   constructor() {
     super();
     this.state = {
-      pointIntervalTimeout: 1000,
-      pointIntervalEnabled: true,
-      trackIntervalTimeout: 10000,
-      trackIntervalEnabled: true,
+      intervalTimeout: 1000,
+      intervalEnabled: true,
       position: 0,
       footprint: 0,
+      pointsAhead: 0,
+      updateCounter: 0,
+      trackUpdateFreq: 10,
     };
   }
 
@@ -51,7 +52,7 @@ class Satellite extends Component {
     try {
       position = Satellite.getPosition(track);
     } catch (e) {
-      // console.log('Error:', e.message);
+      console.log('Error:', e.message);
       this.setState({
         intervalEnabled: false,
       });
@@ -62,13 +63,30 @@ class Satellite extends Component {
         position,
         footprint,
       });
+      if (this.state.updateCounter === this.state.trackUpdateFreq) {
+        if (!this.state.pointsAhead) {
+          this.setState({
+            pointsAhead: track.length - (position.t - track[0].t),
+          });
+        } else {
+          const diff = this.state.pointsAhead - (track.length - (position.t - track[0].t));
+          this.props.updateTrack(this.props.satellite,
+            _.last(this.props.track[satellite]).t, diff);
+        }
+        this.setState({
+          updateCounter: 0,
+        });
+      }
     }
+    this.setState({
+      updateCounter: this.state.updateCounter + 1,
+    });
   }
 
   render() {
     const satellite = this.props.satellite;
     if (!this.props.track || !this.props.track[satellite] || !this.props.track[satellite].length) {
-      // console.log(`Satellite ${satellite} is loading...`);
+      console.log(`Satellite ${satellite} is loading...`);
       return <noscript />;
     }
     const track = this.props.track[satellite];
@@ -104,22 +122,12 @@ class Satellite extends Component {
           }}
         />
         <ReactInterval
-          timeout={this.state.pointIntervalTimeout}
-          enabled={this.state.pointIntervalEnabled &&
+          timeout={this.state.intervalTimeout}
+          enabled={this.state.intervalEnabled &&
             this.props.track[satellite] &&
             this.props.track[satellite].length}
           callback={() => {
             this.updateSatelliteData();
-          }}
-        />
-        <ReactInterval
-          timeout={this.state.trackIntervalTimeout}
-          enabled={this.state.trackIntervalEnabled &&
-            this.props.track[satellite] &&
-            this.props.track[satellite].length}
-          callback={() => {
-            this.props.updateTrack(this.props.satellite,
-              _.last(this.props.track[satellite]).t, 10);
           }}
         />
       </div>

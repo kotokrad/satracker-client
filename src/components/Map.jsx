@@ -7,16 +7,6 @@ import { COLORS } from '../config';
 
 class Map extends Component {
 
-  constructor() {
-    super();
-    this.state = {
-      intervalTimeout: 240000,
-      intervalEnabled: true,
-      staticDate: new Date(),
-      date: new Date(),
-    };
-  }
-
 // eslint-disable-next-line class-methods-use-this
   renderSatellites() {
     const satelliteList = ['noaa-19', 'noaa-18'];  // TODO: get list from user's data
